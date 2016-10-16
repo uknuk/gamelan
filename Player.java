@@ -13,42 +13,41 @@ import javafx.geometry.Orientation;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Arrays;
-import java.util.ArrayList;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.function.Consumer;
-import org.apache.commons.io.FilenameUtils;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
 
 public class Player {
 
-  private Lib lib = new Lib();
+  private final Lib lib = new Lib();
   private Map<String, FlowPane> panes = new HashMap<>();
   private Map<String, Label> labels = new HashMap<>();
-  private Button btn = new Button();
-  private TabPane root;
+  private final Button btn = new Button();
+  private final TabPane root;
   private String art;
-  private String selected;
+  private String selArt;
   private String alb;
-  private ArrayList<String> tracks;
+  private List<String> tracks;
+  private List<String> albs;
+  private List<String> selAlbs;
   private MediaPlayer mp;
   private int    pos;
 
   public Player(TabPane rootPane) {
     root = rootPane;
-    String[] pNames = {"tracks", "alb", "art"};
+    String[] pNames = {"tracks", "albs", "selAlbs", "arts"};
     Arrays.asList(pNames)
       .forEach(name -> panes.put(name, new FlowPane(Orientation.HORIZONTAL)));
 
     HBox control = new HBox(10);
     ObservableList<Node> children = control.getChildren();
-    String[] lNames = {"art", "alb", "track", "sel"};
+    String[] lNames = {"art", "alb", "track", "selArt"};
     Arrays.asList(lNames)
       .forEach(name -> {
           Label lbl = new Label();
@@ -63,14 +62,19 @@ public class Player {
     Label lbl = new Label("Tracks");
     lbl.setStyle("-fx-text-fill: green");
 
-    VBox grid = new VBox(10);
-    grid.getChildren()
+    VBox pGrid = new VBox(10);
+    pGrid.getChildren()
       .addAll(control, lbl, lib.makeScroll(panes.get("tracks")), 
-              labels.get("sel"), panes.get("alb"));
+              panes.get("albs"));
+    
+    VBox sGrid = new VBox(5);
+    sGrid.getChildren()
+      .addAll(labels.get("selArt"), panes.get("selAlbs"),
+              lib.makeScroll(panes.get("arts")));
 
     ObservableList<Tab> tabs = root.getTabs();
-    tabs.add(new Tab("Player", grid));
-    tabs.add(new Tab("Select", lib.makeScroll(panes.get("art"))));
+    tabs.add(new Tab("Player", pGrid));
+    tabs.add(new Tab("Select", sGrid));
     root.getSelectionModel().select(0);
     loadLast();
     loadArtists();
@@ -98,35 +102,61 @@ public class Player {
               .toArray(String[]::new)[0];
 
       // first version assumes only one dir
-      show(lib.load(dir), "art", ard -> loadAlbums(dir + '/' + ard));
+      show(lib.load(dir), "arts", ard -> loadAlbums(lib.join(dir, ard)));
     }
     catch (IOException ex) {
       System.out.println("File ~/.config/mdirs not found");
     }
   }
     
-  private void loadAlbums(String dir) {
+  private void loadAlbums(String dir) {    
+    selAlbs = lib.load(dir);
+    selArt = dir;
+    labels.get("selArt").setText(lib.base(dir) + ':');
+    show(selAlbs, "selAlbs", ald -> selectAlbum(lib.join(dir, ald)));
+  }
+  
+  private void selectAlbum(String selAlb) {
     root.getSelectionModel().select(0);
-    labels.get("sel").setText(FilenameUtils.getBaseName(dir) + ':');
-    show(lib.load(dir), "alb", ald -> loadTracks(dir + '/' + ald));
+    art = selArt;
+    alb = selAlb;
+    albs = lib.addPath(selAlbs, selArt);
+    show(albs, "albs", ald -> selectAlbum(ald));
+    loadTracks(alb);
   }
   
   private void loadTracks(String dir) {
-    tracks = lib.load(dir);
+    List<String> files = lib.tracks(dir);
+    tracks = lib.addPath(files, dir);
     panes.get("tracks").getChildren().clear();
-    show(tracks, "tracks", track -> playTrack(dir + '/' + track));
-    System.out.println(dir);
+    show(files, "tracks", track -> play(tracks.indexOf(lib.join(dir, track))));
+    play(0);
+  }
+  
+  
+  private void play(int n) {
+    if (n == -1) 
+      pos++;
+    else
+      pos = n;
+    
+    playTrack(tracks.get(pos));
   }
   
   private void playTrack(String track) {
+    if (mp != null)
+      mp.stop();
+    
     mp = new MediaPlayer(new Media(new File(track).toURI().toString()));
     mp.play();
+    mp.setOnEndOfMedia(() -> play(-1));
   }  
 
-  private void show(ArrayList<String> files, String kind, 
+  private void show(List<String> files, String kind, 
           Consumer<String> fun) {
     ObservableList<Node> ch = panes.get(kind).getChildren();
     ch.clear();
+    
     files.forEach(file -> 
             ch.add(lib.makeButton(file, kind, e -> fun.accept(file))));
   }
