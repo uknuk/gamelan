@@ -19,8 +19,11 @@ import java.nio.file.Paths;
 import java.io.File;
 import java.io.IOException;
 import java.util.function.Consumer;
+import org.apache.commons.io.FilenameUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 
 
 public class Player {
@@ -29,12 +32,16 @@ public class Player {
   private Map<String, FlowPane> panes = new HashMap<>();
   private Map<String, Label> labels = new HashMap<>();
   private Button btn = new Button();
+  private TabPane root;
   private String art;
   private String selected;
   private String alb;
+  private ArrayList<String> tracks;
+  private MediaPlayer mp;
   private int    pos;
 
-  public Player(TabPane root) {
+  public Player(TabPane rootPane) {
+    root = rootPane;
     String[] pNames = {"tracks", "alb", "art"};
     Arrays.asList(pNames)
       .forEach(name -> panes.put(name, new FlowPane(Orientation.HORIZONTAL)));
@@ -91,9 +98,7 @@ public class Player {
               .toArray(String[]::new)[0];
 
       // first version assumes only one dir
-      ArrayList<String> arts = 
-              new ArrayList<>(Arrays.asList((new File(dir)).list()));
-      show(arts, "art", ad -> loadAlbums(dir + '/' + ad));
+      show(lib.load(dir), "art", ard -> loadAlbums(dir + '/' + ard));
     }
     catch (IOException ex) {
       System.out.println("File ~/.config/mdirs not found");
@@ -101,8 +106,22 @@ public class Player {
   }
     
   private void loadAlbums(String dir) {
+    root.getSelectionModel().select(0);
+    labels.get("sel").setText(FilenameUtils.getBaseName(dir) + ':');
+    show(lib.load(dir), "alb", ald -> loadTracks(dir + '/' + ald));
+  }
+  
+  private void loadTracks(String dir) {
+    tracks = lib.load(dir);
+    panes.get("tracks").getChildren().clear();
+    show(tracks, "tracks", track -> playTrack(dir + '/' + track));
     System.out.println(dir);
   }
+  
+  private void playTrack(String track) {
+    mp = new MediaPlayer(new Media(new File(track).toURI().toString()));
+    mp.play();
+  }  
 
   private void show(ArrayList<String> files, String kind, 
           Consumer<String> fun) {

@@ -1,5 +1,8 @@
 package gamelan;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
 import javafx.event.ActionEvent;
@@ -16,10 +19,10 @@ public class Lib {
   public Lib() {
     TXT_MAX.put("art", 25);
     TXT_MAX.put("alb", 40);
-    TXT_MAX.put("track", 30);
+    TXT_MAX.put("tracks", 30);
     FONT.put("art", 8);
     FONT.put("alb", 10);
-    FONT.put("track", 9);
+    FONT.put("tracks", 9);
   }
 
   public ScrollPane makeScroll(FlowPane pane) {
@@ -41,6 +44,10 @@ public class Lib {
                                FONT.get(kind)));
     btn.setOnAction(fun);
     return btn;
+  }
+  
+  ArrayList<String> load(String dir) {
+    return new ArrayList<>(Arrays.asList((new File(dir)).list()));
   }
 
 }
