@@ -6,7 +6,6 @@ import javafx.scene.layout.FlowPane;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
@@ -15,12 +14,13 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.io.File;
 import java.io.IOException;
+import java.util.function.Consumer;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 
 
 public class Player {
@@ -58,7 +58,8 @@ public class Player {
 
     VBox grid = new VBox(10);
     grid.getChildren()
-      .addAll(control, lbl, lib.makeScroll(panes.get("tracks")), labels.get("sel"), panes.get("alb"));
+      .addAll(control, lbl, lib.makeScroll(panes.get("tracks")), 
+              labels.get("sel"), panes.get("alb"));
 
     ObservableList<Tab> tabs = root.getTabs();
     tabs.add(new Tab("Player", grid));
@@ -92,17 +93,23 @@ public class Player {
       // first version assumes only one dir
       ArrayList<String> arts = 
               new ArrayList<>(Arrays.asList((new File(dir)).list()));
-      show(arts, "art");
+      show(arts, "art", ad -> loadAlbums(dir + '/' + ad));
     }
     catch (IOException ex) {
       System.out.println("File ~/.config/mdirs not found");
     }
   }
+    
+  private void loadAlbums(String dir) {
+    System.out.println(dir);
+  }
 
-  private void show(ArrayList<String> files, String kind) {
+  private void show(ArrayList<String> files, String kind, 
+          Consumer<String> fun) {
     ObservableList<Node> ch = panes.get(kind).getChildren();
     ch.clear();
-    files.forEach(file -> ch.add(lib.makeButton(file, kind)));
+    files.forEach(file -> 
+            ch.add(lib.makeButton(file, kind, e -> fun.accept(file))));
   }
 
 }

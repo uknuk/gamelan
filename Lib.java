@@ -2,6 +2,8 @@ package gamelan;
 
 import java.util.Map;
 import java.util.HashMap;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.control.Button;
@@ -28,7 +30,8 @@ public class Lib {
   }
 
 
-  public Button makeButton(String file, String kind) {
+  public Button makeButton(String file, String kind, 
+          EventHandler<ActionEvent> fun) {
     int max = TXT_MAX.get(kind);
     if (file.length() > max)
       file = file.substring(0, max);
@@ -36,6 +39,7 @@ public class Lib {
     Button btn = new Button(file);
     btn.setStyle(String.format("-fx-text-fill: blue; -fx-font-size: %dpt",
                                FONT.get(kind)));
+    btn.setOnAction(fun);
     return btn;
   }
 
