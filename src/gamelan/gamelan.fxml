@@ -1,17 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TabPane?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.FlowPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-
-<?import javafx.scene.control.Separator?>
-<TabPane prefHeight="572.0" prefWidth="1024.0" tabClosingPolicy="UNAVAILABLE"
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<TabPane tabClosingPolicy="UNAVAILABLE"
          xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.111"
          fx:controller="gamelan.Controller"
@@ -24,18 +15,30 @@
                <children>
                   <VBox>
                      <children>
-                        <HBox fx:id="info" spacing="10.0">
+                         <HBox spacing="10">
+                        <FlowPane fx:id="info"
+                              style="-fx-font-size: 20pt">
+
                            <children>
-                              <Label fx:id="artist"  />
-                              <Label fx:id="album"  />
-                              <Label fx:id="track" />
-                              <Button fx:id="pause" style="-fx-text-fill: red" mnemonicParsing="false"  />
+                              <Label fx:id="artist"  style="-fx-text-fill: blue"/>
+                              <Label fx:id="album" style="-fx-text-fill: green" />
+                              <Label fx:id="track" style="-fx-text-fill: blue" />
+
                            </children>
-                        </HBox>
-                         <Separator orientation="HORIZONTAL" />
-                        <FlowPane fx:id="albums" prefWidth="1024"/>
-                         <Separator orientation="HORIZONTAL" />
-                        <FlowPane fx:id="tracks" prefWidth="1024"/>
+                        </FlowPane>
+                             <Button fx:id="btn"
+                                     style="-fx-text-fill: red; -fx-font-size: 24pt"
+                                     onAction="#pauseHandler"
+                                     mnemonicParsing="false"  />
+                         </HBox>
+                         <Separator orientation="HORIZONTAL" prefHeight="20"/>
+                         <HBox spacing="10">
+                          <Slider min="0" value="0" prefWidth="800"/>
+                         </HBox>
+                         <Separator orientation="HORIZONTAL" prefHeight="20"/>
+                         <FlowPane fx:id="albums" style="-fx-text-fill: green" />
+                         <Separator orientation="HORIZONTAL" prefHeight="20"/>
+                        <FlowPane fx:id="tracks" style="-fx-text-fill: blue" />
                      </children>
                   </VBox>
                </children></AnchorPane>
@@ -49,7 +52,7 @@
                     <content>
                       <AnchorPane>
                            <children>
-                              <FlowPane fx:id = "artists" prefWidth="1024"/>
+                              <FlowPane fx:id = "artists" style="-fx-text-fill: blue" />
                            </children>
                         </AnchorPane>
                     </content>

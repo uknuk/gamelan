@@ -2,8 +2,10 @@ package gamelan;
 
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaPlayer.Status;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -11,10 +13,10 @@ import java.util.*;
 
 
 public class Model {
-
-  final String LAST_FILE = "/.local/mlast";
-  final String MUS_DIRS = "/.config/mdirs";
   final String HOME = System.getenv("HOME");
+  final String LAST_FILE = HOME + "/.local/mlast";
+  final String MUS_DIRS = HOME + "/.config/mdirs";
+
 
   Controller control;
   Map<String, String> arts = new TreeMap<>();
@@ -30,18 +32,16 @@ public class Model {
 
   Model(Controller control) {
     this.control = control;
-      loadLast();
-      loadArtists();
+    System.out.println(System.getProperty("os.name"));
   }
 
 
   void loadLast() {
     try {
-      String[] lines = Files.lines(Paths.get(HOME + LAST_FILE))
+      String[] lines = Files.lines(Paths.get(LAST_FILE))
           .toArray(String[]::new);
-      selArt = lines[0];
-      nTrack = Integer.parseInt(lines[2]);
-      System.out.println(nTrack);
+      control.selectArtist(lines[0]);
+      control.selectAlbum(lines[1], Integer.parseInt(lines[2]));
     }
     catch (IOException ex) {
       System.out.printf("File %s not found", LAST_FILE);
@@ -51,7 +51,7 @@ public class Model {
   SortedSet<String> loadArtists() {
     try {
       String[] dirs = Files
-          .lines(Paths.get(HOME + MUS_DIRS))
+          .lines(Paths.get(MUS_DIRS))
           .toArray(String[]::new)[0]
           .replace("\\n+", "")
           .split("\\s+");
@@ -74,17 +74,14 @@ public class Model {
     return selAlbs;
   }
 
-  ArrayList<String> selectAlbum(String alb) {
-    return selectAlbum(alb, 0);
-  }
-
-
   ArrayList<String> selectAlbum(String alb, int nTrack) {
     art = selArt;
     this.alb = alb;
     albs = selAlbs;
     nAlb = albs.indexOf(alb);
-    loadTracks(Lib.join(arts.get(art), alb));
+    control.artist.setText(art);
+    control.album.setText(alb);
+    tracks = Lib.tracks(arts.get(art), alb);
     this.nTrack = nTrack;
     playTrack(tracks.get(nTrack));
     return tracks;
@@ -94,18 +91,16 @@ public class Model {
     if (mp != null)
       mp.stop();
 
-    mp = new MediaPlayer(new Media(new File(track).toURI().toString()));
+    control.track.setText(track);
+    String file = Lib.join(arts.get(art), alb, track);
+    Media m = new Media(new File(file).toURI().toString());
+    mp = new MediaPlayer(m);
+    mp.setOnReady(() ->  System.out.println(m.getDuration()));
     mp.play();
+    save();
+    control.btn.setText("||");
     mp.setOnEndOfMedia(() -> play(-1));
   }
-
-  ArrayList<String> loadTracks(String dir) {
-    List<String> files = Lib.tracks(dir);
-    tracks = Lib.addPath(files, dir);
-    return tracks;
-  }
-
-
 
   void play(int n) {
     if (n == -1)
@@ -116,11 +111,33 @@ public class Model {
     playTrack(tracks.get(nTrack));
   }
 
+  void save() {
+    try {
+      FileWriter fw = new FileWriter(LAST_FILE);
+      String[] data = {art, alb, Integer.toString(nTrack)};
+      Arrays.asList(data).forEach(val -> {
+            try {
+              fw.write(val + System.getProperty("line.separator"));
+            } catch (IOException ex) {
+              System.out.printf("Could not write to last file");
+            }
+          });
+      fw.close();
+    }
+    catch (IOException ex) {
+      System.out.printf("Could not open last file");
+    }
+  }
 
-
-
-
-
-
+  void changePlay() {
+    Status status = mp.getStatus();
+    if (status == Status.PLAYING) {
+      mp.pause();
+      control.btn.setText(">");
+    } else if (status == Status.PAUSED) {
+      mp.play();
+      control.btn.setText("||");
+    }
+  }
 
 }

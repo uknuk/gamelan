@@ -1,6 +1,7 @@
 package gamelan;
 
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -8,7 +9,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.FlowPane;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Set;
 import java.util.function.Consumer;
 
 
@@ -20,19 +23,27 @@ public class Controller {
 
   @FXML Label artist;
   @FXML Label album;
+  @FXML Label track;
 
-  @FXML Button pause;
+  @FXML Button btn;
 
   @FXML FlowPane tracks;
   @FXML FlowPane artists;
   @FXML FlowPane albums;
+  @FXML FlowPane info;
 
   @FXML public void initialize() {
     Lib.init();
-    model = new Model(this);
 
+    FlowPane[] panes = {artists, albums, tracks};
+    Arrays.asList(panes).forEach(p -> p.setPrefWidth(Lib.WIDTH));
+    info.setPrefWidth(Lib.WIDTH*0.9);
+
+    model = new Model(this);
     showArtists(model.loadArtists());
-      root.getSelectionModel().select(0);
+    model.loadLast();
+    //root.getSelectionModel().select(1);
+
   }
 
   void showArtists(Set<String> arts) {
@@ -44,11 +55,16 @@ public class Controller {
   }
 
   void selectArtist(String art) {
+    root.getSelectionModel().select(0);
     show(model.selectArtist(art), albums, "albs", a -> selectAlbum(a));
   }
 
   void selectAlbum(String alb) {
-    show(model.selectAlbum(alb), tracks, "tracks", t -> selectTrack(t));
+    selectAlbum(alb, 0);
+  }
+
+  void selectAlbum(String alb, int nTrack) {
+    show(model.selectAlbum(alb, nTrack), tracks, "tracks", t -> selectTrack(t));
   }
 
   void selectTrack(String track) {
@@ -63,6 +79,11 @@ public class Controller {
 
     files.forEach(file ->
       ch.add(lib.makeButton(file, kind, e -> fun.accept(file))));
+  }
+
+  @FXML
+  void pauseHandler(ActionEvent ev) {
+    model.changePlay();
   }
 
 }

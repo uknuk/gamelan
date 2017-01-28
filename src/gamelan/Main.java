@@ -12,7 +12,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         Parent root = FXMLLoader.load(getClass().getResource("gamelan.fxml"));
         primaryStage.setTitle("Gamelan");
-        primaryStage.setScene(new Scene(root, 1024, 572));
+        primaryStage.setScene(new Scene(root, Lib.WIDTH, Lib.WIDTH/1.8));
         primaryStage.show();
     }
 
