@@ -3,6 +3,7 @@ package gamelan;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaPlayer.Status;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -15,9 +16,9 @@ import java.util.*;
 
 
 public class Model {
-  final String HOME = System.getenv("HOME");
-  final String LAST_FILE = HOME + "/.local/mlast";
-  final String MUS_DIRS = HOME + "/.config/mdirs";
+  String home;
+  String lastFile = ".local/mlast";
+  String dirsFile = ".config/mdirs";
 
 
   Controller control;
@@ -34,26 +35,31 @@ public class Model {
 
   Model(Controller control) {
     this.control = control;
-    System.out.println(System.getProperty("os.name"));
+    home = System.getProperty("os.name") == "Linux"
+            ? System.getenv("HOME")
+            : System.getenv("USERPROFILE");
+
+    lastFile = FilenameUtils.concat(home, lastFile);
+    dirsFile = FilenameUtils.concat(home, dirsFile);
   }
 
 
   void loadLast() {
     try {
-      String[] lines = Files.lines(Paths.get(LAST_FILE))
+      String[] lines = Files.lines(Paths.get(lastFile))
           .toArray(String[]::new);
       control.selectArtist(lines[0]);
       control.selectAlbum(lines[1], Integer.parseInt(lines[2]));
     }
     catch (IOException ex) {
-      System.out.printf("File %s not found", LAST_FILE);
+      System.out.printf("File %s not found", lastFile);
     }
   }
 
   SortedSet<String> loadArtists() {
     try {
       String[] dirs = Files
-          .lines(Paths.get(MUS_DIRS))
+          .lines(Paths.get(dirsFile))
           .toArray(String[]::new)[0]
           .replace("\\n+", "")
           .split("\\s+");
@@ -65,7 +71,7 @@ public class Model {
       return new TreeSet(arts.keySet());
     }
     catch (IOException ex) {
-      System.out.printf("File %s not found", MUS_DIRS);
+      System.out.printf("File %s not found", dirsFile);
       return null;
     }
   }
@@ -129,7 +135,7 @@ public class Model {
 
   void save() {
     try {
-      FileWriter fw = new FileWriter(LAST_FILE);
+      FileWriter fw = new FileWriter(lastFile);
       String[] data = {art, alb, Integer.toString(nTrack)};
       Arrays.asList(data).forEach(val -> {
             try {
@@ -157,7 +163,7 @@ public class Model {
   }
 
   void getDuration() {
-    if (mp.getStatus() == Status.PLAYING) {
+    if (mp != null && mp.getStatus() == Status.PLAYING) {
       double duration = mp.getTotalDuration().toSeconds();
       double current = mp.getCurrentTime().toSeconds();
       control.slider.setValue(current/duration);
