@@ -2,6 +2,7 @@ package gamelan;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import org.apache.commons.io.FilenameUtils;
 
@@ -29,16 +30,6 @@ public class Lib {
       FONT.put(KINDS[n], FONT_SIZES[n]);
       COLOR.put(KINDS[n], COLORS[n]);
     }
-   /* TXT_MAX.put("arts", 25);
-    TXT_MAX.put("albs", 40);
-    TXT_MAX.put("tracks", 30);
-    FONT.put("arts", 8);
-    FONT.put("albs", 10);
-    FONT.put("tracks", 9);
-    COLOR.put("arts", "blue");
-    COLOR.put("albs", "green");
-    COLOR.put("tracks", "blue");*/
-
   }
 
 
@@ -46,7 +37,6 @@ public class Lib {
           EventHandler<ActionEvent> fun) {
     
     String name = base(file);
-    
     int max = TXT_MAX.get(kind);
     if (name.length() > max)
       name = name.substring(0, max);
@@ -58,6 +48,12 @@ public class Lib {
     btn.setOnAction(fun);
     return btn;
   }
+
+  static void style(Node node, String kind, String color) {
+    node.setStyle(String.format("-fx-text-fill: %s; -fx-font-size: %dpt",
+        color, FONT.get(kind)));
+  }
+
   
   static ArrayList<String> tracks(String artist, String album) {
     String dir = join(artist, album);
@@ -78,7 +74,26 @@ public class Lib {
             .collect(Collectors.toList()));
   }
 
-  
+
+  static String cut(String name, int limit) {
+
+    List<String> words = Arrays.asList(name.split("(\\s+)(_+)(-+)"))
+        .stream()
+        .filter(w -> w.length() > 0).collect(Collectors.toList());
+
+    int[] sizes = new int[words.size()];
+
+    int length = 0;
+    for (int n = 0; n < words.size(); n++) {
+      length += words.get(n).length();
+      sizes[n] = length;
+    }
+
+    return String.join(" ",
+        words.stream().filter(w -> sizes[words.indexOf(w)] < limit)
+        .toArray(String[]::new));
+  }
+
   static String join(String dir1, String dir2, String dir3) {
     return join(dir1, join(dir2, dir3));
   }
@@ -90,6 +105,5 @@ public class Lib {
   static String base(String path) {
     return FilenameUtils.getBaseName(path);
   }
-
 
 }

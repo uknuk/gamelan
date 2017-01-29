@@ -18,12 +18,10 @@
                          <HBox spacing="10">
                         <FlowPane fx:id="info"
                               style="-fx-font-size: 20pt">
-
                            <children>
                               <Label fx:id="artist"  style="-fx-text-fill: blue"/>
                               <Label fx:id="album" style="-fx-text-fill: green" />
                               <Label fx:id="track" style="-fx-text-fill: blue" />
-
                            </children>
                         </FlowPane>
                              <Button fx:id="btn"
@@ -32,9 +30,13 @@
                                      mnemonicParsing="false"  />
                          </HBox>
                          <Separator orientation="HORIZONTAL" prefHeight="20"/>
-                         <HBox spacing="10">
-                          <Slider min="0" value="0" prefWidth="800"/>
+                         <HBox spacing="10" style="-fx-font-size: 14pt">
+                           <Label fx:id="current" style="-fx-text-fill: blue" />
+                           <Slider fx:id="slider" min="0" max="1" value="0"  />
+                           <Label fx:id="duration" style="-fx-text-fill: blue" />
+
                          </HBox>
+
                          <Separator orientation="HORIZONTAL" prefHeight="20"/>
                          <FlowPane fx:id="albums" style="-fx-text-fill: green" />
                          <Separator orientation="HORIZONTAL" prefHeight="20"/>

@@ -9,6 +9,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 
@@ -78,9 +80,11 @@ public class Model {
     art = selArt;
     this.alb = alb;
     albs = selAlbs;
+    control.restore("albs", nAlb);
     nAlb = albs.indexOf(alb);
-    control.artist.setText(art);
-    control.album.setText(alb);
+    control.activate("albs", nAlb);
+    control.artist.setText(" " + art);
+    control.album.setText(" " + alb);
     tracks = Lib.tracks(arts.get(art), alb);
     this.nTrack = nTrack;
     playTrack(tracks.get(nTrack));
@@ -91,11 +95,9 @@ public class Model {
     if (mp != null)
       mp.stop();
 
-    control.track.setText(track);
+    control.track.setText(" " + track);
     String file = Lib.join(arts.get(art), alb, track);
-    Media m = new Media(new File(file).toURI().toString());
-    mp = new MediaPlayer(m);
-    mp.setOnReady(() ->  System.out.println(m.getDuration()));
+    mp = new MediaPlayer(new Media(new File(file).toURI().toString()));
     mp.play();
     save();
     control.btn.setText("||");
@@ -103,11 +105,25 @@ public class Model {
   }
 
   void play(int n) {
-    if (n == -1)
-      nTrack++;
+    control.restore("tracks", nTrack);
+
+    if (n == -1) {
+      int next;
+      next = nTrack + 1;
+      if (next < tracks.size())
+        nTrack = next;
+      else {
+        next = nAlb + 1;
+        if (next < albs.size()) {
+          control.selectAlbum(albs.get(next));
+        }
+        return;
+      }
+    }
     else
       nTrack = n;
 
+    control.activate("tracks", nTrack);
     playTrack(tracks.get(nTrack));
   }
 
@@ -138,6 +154,21 @@ public class Model {
       mp.play();
       control.btn.setText("||");
     }
+  }
+
+  void getDuration() {
+    if (mp.getStatus() == Status.PLAYING) {
+      double duration = mp.getTotalDuration().toSeconds();
+      double current = mp.getCurrentTime().toSeconds();
+      control.slider.setValue(current/duration);
+      control.current.setText("  " + format(current));
+      control.duration.setText(format(duration));
+    }
+  }
+
+  String format(double time) {
+    return LocalTime.ofSecondOfDay((long) time)
+        .format(DateTimeFormatter.ofPattern("mm:ss"));
   }
 
 }
