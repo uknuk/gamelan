@@ -40,7 +40,7 @@ public class Lib {
     int max = TXT_MAX.get(kind);
     if (name.length() > max)
       name = name.substring(0, max);
-    
+
     Button btn = new Button(name);
     btn.setMnemonicParsing(false);
     btn.setStyle(String.format("-fx-text-fill: %s; -fx-font-size: %dpt",
