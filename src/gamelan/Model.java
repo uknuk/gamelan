@@ -35,7 +35,7 @@ public class Model {
 
   Model(Controller control) {
     this.control = control;
-    home = System.getProperty("os.name") == "Linux"
+    home = System.getProperty("os.name").equals("Linux")
             ? System.getenv("HOME")
             : System.getenv("USERPROFILE");
 

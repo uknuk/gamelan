@@ -52,7 +52,7 @@ public class Controller {
     model = new Model(this);
     showArtists(model.loadArtists());
     model.loadLast();
-    Timeline timeline = new Timeline(new KeyFrame(Duration.millis(2500),
+    Timeline timeline = new Timeline(new KeyFrame(Duration.millis(1000),
         e -> model.getDuration()));
     timeline.setCycleCount(Animation.INDEFINITE);
     timeline.play();
