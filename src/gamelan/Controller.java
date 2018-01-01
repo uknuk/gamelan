@@ -16,13 +16,13 @@ import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 
 
 public class Controller {
-  Model model;
-  Lib  lib;
+  private Model model;
 
   @FXML TabPane root;
 
@@ -61,17 +61,17 @@ public class Controller {
 
   }
 
-  void showArtists(Set<String> arts) {
+  private void showArtists(Set<String> arts) {
     ObservableList<Node> ch = artists.getChildren();
 
     arts.forEach(art ->
-        ch.add(lib.makeButton(art, "arts", e -> selectArtist(art))));
+        ch.add(Lib.makeButton(art, "arts", e -> selectArtist(art))));
 
   }
 
   void selectArtist(String art) {
     root.getSelectionModel().select(0);
-    show(model.selectArtist(art), albums, "albs", a -> selectAlbum(a));
+    show(model.selectArtist(art), albums, "albs", this::selectAlbum);
   }
 
   void selectAlbum(String alb) {
@@ -79,11 +79,11 @@ public class Controller {
   }
 
   void selectAlbum(String alb, int nTrack) {
-    show(model.selectAlbum(alb, nTrack), tracks, "tracks", t -> selectTrack(t));
+    show(model.selectAlbum(alb, nTrack), tracks, "tracks", this::selectTrack);
     activate("tracks", nTrack);
   }
 
-  void selectTrack(String track) { model.playTrack(track);
+  private void selectTrack(String track) { model.playTrack(track);
   }
 
   private void show(ArrayList<String> files, FlowPane pane, String kind,
@@ -93,7 +93,7 @@ public class Controller {
     ch.clear();
 
     files.forEach(file ->
-      ch.add(lib.makeButton(file, kind, e -> fun.accept(file))));
+      ch.add(Lib.makeButton(file, kind, e -> fun.accept(file))));
   }
 
   @FXML
@@ -101,8 +101,8 @@ public class Controller {
     model.changePlay();
   }
 
-  void paint(String kind, int n, String color) {
-    FlowPane pane = kind == "tracks" ? tracks : albums;
+  private void paint(String kind, int n, String color) {
+    FlowPane pane = Objects.equals(kind, "tracks") ? tracks : albums;
     ObservableList<Node> list = pane.getChildren();
     if (list.isEmpty())
       return;

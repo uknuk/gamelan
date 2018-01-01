@@ -24,17 +24,17 @@
                               <Label fx:id="track" style="-fx-text-fill: blue" />
                            </children>
                         </FlowPane>
-                             <Button fx:id="btn"
-                                     style="-fx-text-fill: red; -fx-font-size: 24pt"
-                                     onAction="#pauseHandler"
-                                     mnemonicParsing="false"  />
+
                          </HBox>
                          <Separator orientation="HORIZONTAL" prefHeight="20"/>
                          <HBox spacing="10" style="-fx-font-size: 14pt">
                            <Label fx:id="current" style="-fx-text-fill: blue" />
                            <Slider fx:id="slider" min="0" max="1" value="0"  />
                            <Label fx:id="duration" style="-fx-text-fill: blue" />
-
+                             <Button fx:id="btn"
+                                     style="-fx-text-fill: red; -fx-font-size: 16pt"
+                                     onAction="#pauseHandler"
+                                     mnemonicParsing="false"  />
                          </HBox>
 
                          <Separator orientation="HORIZONTAL" prefHeight="20"/>

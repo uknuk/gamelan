@@ -11,16 +11,16 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class Lib {
+class Lib {
 
-  static final int[] TXT_SIZES = {25, 40, 30};
-  static final int[] FONT_SIZES = {10, 14, 12}; // make dynamic
-  static final String[] COLORS = {"blue", "green", "blue"};
-  static final String[] KINDS = {"arts", "albs", "tracks"};
-  static final Map<String, Integer> TXT_MAX = new HashMap<>();
-  static final Map<String, Integer> FONT = new HashMap<>();
+  private static final int[] TXT_SIZES = {25, 40, 30};
+  private static final int[] FONT_SIZES = {14, 14, 12}; // make dynamic
+  private static final String[] COLORS = {"blue", "green", "blue"};
+  private static final String[] KINDS = {"arts", "albs", "tracks"};
+  private static final Map<String, Integer> TXT_MAX = new HashMap<>();
+  private static final Map<String, Integer> FONT = new HashMap<>();
   static final Map<String, String> COLOR = new HashMap<>();
-  static final Pattern REX = Pattern.compile("\\.mp3$|\\.mp4a$");
+  private static final Pattern REX = Pattern.compile("\\.mp3$|\\.mp4a$");
 
   static final int WIDTH = 1024;
 
@@ -40,6 +40,7 @@ public class Lib {
     int max = TXT_MAX.get(kind);
     if (name.length() > max)
       name = name.substring(0, max);
+      //name = cut(name, max);
 
     Button btn = new Button(name);
     btn.setMnemonicParsing(false);
@@ -77,8 +78,7 @@ public class Lib {
 
   static String cut(String name, int limit) {
 
-    List<String> words = Arrays.asList(name.split("(\\s+)(_+)(-+)"))
-        .stream()
+    List<String> words = Arrays.stream(name.split("(\\s+)(_+)(-+)"))
         .filter(w -> w.length() > 0).collect(Collectors.toList());
 
     int[] sizes = new int[words.size()];
@@ -102,7 +102,7 @@ public class Lib {
     return FilenameUtils.concat(dir1, dir2);
   }
   
-  static String base(String path) {
+  private static String base(String path) {
     return FilenameUtils.getBaseName(path);
   }
 

@@ -15,23 +15,23 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 
-public class Model {
-  String home;
-  String lastFile = ".local/mlast";
-  String dirsFile = ".config/mdirs";
+class Model {
+  private final String LAST_FILE = ".local/mlast";
+  private final String DIRS_FILE = ".config/mdirs";
 
-
-  Controller control;
-  Map<String, String> arts = new TreeMap<>();
-  String art;
-  String selArt;
-  String alb;
-  ArrayList<String> tracks;
-  ArrayList<String> albs;
-  ArrayList<String> selAlbs;
-  MediaPlayer mp;
-  int  nTrack;
-  int nAlb;
+  private final String home;
+  private String lastFile;
+  private final Controller control;
+  private final Map<String, String> arts = new TreeMap<>();
+  private String art;
+  private String selArt;
+  private String alb;
+  private ArrayList<String> tracks;
+  private ArrayList<String> albs;
+  private ArrayList<String> selAlbs;
+  private MediaPlayer mp;
+  private int  nTrack;
+  private int nAlb;
 
   Model(Controller control) {
     this.control = control;
@@ -39,8 +39,8 @@ public class Model {
             ? System.getenv("HOME")
             : System.getenv("USERPROFILE");
 
-    lastFile = FilenameUtils.concat(home, lastFile);
-    dirsFile = FilenameUtils.concat(home, dirsFile);
+    lastFile = FilenameUtils.concat(home, LAST_FILE);
+    //dirsFile = FilenameUtils.concat(home, dirsFile);
   }
 
 
@@ -59,7 +59,7 @@ public class Model {
   SortedSet<String> loadArtists() {
     try {
       String[] dirs = Files
-          .lines(Paths.get(dirsFile))
+          .lines(Paths.get(FilenameUtils.concat(home, DIRS_FILE)))
           .toArray(String[]::new)[0]
           .replace("\\n+", "")
           .split("\\s+");
@@ -68,10 +68,12 @@ public class Model {
           Lib.load(dir).forEach(art ->
               arts.put(art, Lib.join(dir, art))));
 
+      arts.remove("desktop.ini");
+
       return new TreeSet(arts.keySet());
     }
     catch (IOException ex) {
-      System.out.printf("File %s not found", dirsFile);
+      System.out.printf("File %s not found", DIRS_FILE);
       return null;
     }
   }
@@ -83,10 +85,14 @@ public class Model {
   }
 
   ArrayList<String> selectAlbum(String alb, int nTrack) {
-    art = selArt;
+    if (!Objects.equals(art, selArt)) {
+      art = selArt;
+      albs = selAlbs;
+    }
+    else
+      control.restore("albs", nAlb);
+
     this.alb = alb;
-    albs = selAlbs;
-    control.restore("albs", nAlb);
     nAlb = albs.indexOf(alb);
     control.activate("albs", nAlb);
     control.artist.setText(" " + art);
@@ -110,7 +116,7 @@ public class Model {
     mp.setOnEndOfMedia(() -> play(-1));
   }
 
-  void play(int n) {
+  private void play(int n) {
     control.restore("tracks", nTrack);
 
     if (n == -1) {
@@ -133,7 +139,7 @@ public class Model {
     playTrack(tracks.get(nTrack));
   }
 
-  void save() {
+  private void save() {
     try {
       FileWriter fw = new FileWriter(lastFile);
       String[] data = {art, alb, Integer.toString(nTrack)};
@@ -141,13 +147,13 @@ public class Model {
             try {
               fw.write(val + System.getProperty("line.separator"));
             } catch (IOException ex) {
-              System.out.printf("Could not write to last file");
+              System.out.print("Could not write to last file");
             }
           });
       fw.close();
     }
     catch (IOException ex) {
-      System.out.printf("Could not open last file");
+      System.out.print("Could not open last file");
     }
   }
 
@@ -172,7 +178,7 @@ public class Model {
     }
   }
 
-  String format(double time) {
+  private String format(double time) {
     return LocalTime.ofSecondOfDay((long) time)
         .format(DateTimeFormatter.ofPattern("mm:ss"));
   }
