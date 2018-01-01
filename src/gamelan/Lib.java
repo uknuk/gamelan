@@ -10,6 +10,7 @@ import java.io.File;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 class Lib {
 
@@ -35,14 +36,8 @@ class Lib {
 
   static Button makeButton(String file, String kind,
           EventHandler<ActionEvent> fun) {
-    
-    String name = base(file);
-    int max = TXT_MAX.get(kind);
-    if (name.length() > max)
-      //name = name.substring(0, max);
-      name = cut(name, max);
 
-    Button btn = new Button(name);
+    Button btn = new Button(cut(base(file), TXT_MAX.get(kind)));
     btn.setMnemonicParsing(false);
     btn.setStyle(String.format("-fx-text-fill: %s; -fx-font-size: %dpt",
         COLOR.get(kind), FONT.get(kind)));
@@ -54,8 +49,6 @@ class Lib {
     node.setStyle(String.format("-fx-text-fill: %s; -fx-font-size: %dpt",
         color, FONT.get(kind)));
   }
-
-
 
   static ArrayList<String> load(String dir) {
     return new ArrayList(Arrays.stream((new File(dir)).list())
@@ -88,20 +81,11 @@ class Lib {
 
   static String cut(String name, int limit) {
 
-    List<String> words = Arrays.stream(name.split("[\\s+_+-+]"))
-        .filter(w -> w.length() > 0).collect(Collectors.toList());
-
-    int[] sizes = new int[words.size()];
-
-    int length = 0;
-    for (int n = 0; n < words.size(); n++) {
-      length += words.get(n).length();
-      sizes[n] = length;
-    }
-
-    return String.join(" ",
-        words.stream().filter(w -> sizes[words.indexOf(w)] < limit)
-        .toArray(String[]::new));
+    return Stream.of(name.split("[\\s+\\_+\\-+]"))
+            .reduce("", (s,w) -> {
+              String acc = s + " " + w;
+              return acc.length() < limit ? acc : s;
+            });
   }
 
   static String join(String dir1, String dir2, String dir3) {
