@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 class Lib {
 
   private static final int[] TXT_SIZES = {25, 40, 30};
-  private static final int[] FONT_SIZES = {14, 14, 12}; // make dynamic
+  private static final int[] FONT_SIZES = {14, 14, 11}; // make dynamic
   private static final String[] COLORS = {"blue", "green", "blue"};
   private static final String[] KINDS = {"arts", "albs", "tracks"};
   private static final Map<String, Integer> TXT_MAX = new HashMap<>();
@@ -39,8 +39,8 @@ class Lib {
     String name = base(file);
     int max = TXT_MAX.get(kind);
     if (name.length() > max)
-      name = name.substring(0, max);
-      //name = cut(name, max);
+      //name = name.substring(0, max);
+      name = cut(name, max);
 
     Button btn = new Button(name);
     btn.setMnemonicParsing(false);
@@ -55,18 +55,28 @@ class Lib {
         color, FONT.get(kind)));
   }
 
-  
-  static ArrayList<String> tracks(String artist, String album) {
-    String dir = join(artist, album);
-    return new ArrayList(load(dir).stream()
-            .filter(f -> REX.matcher(f).find())
-            .collect(Collectors.toList()));
-    
-  }
-  
+
+
   static ArrayList<String> load(String dir) {
     return new ArrayList(Arrays.stream((new File(dir)).list())
-                .collect(Collectors.toList()));
+            .collect(Collectors.toList()));
+  }
+
+  static ArrayList<String> loadTracks(String artist, String album) {
+    return tracks(join(artist, album));
+  }
+
+  
+  static ArrayList<String> tracks(String dir) {
+    ArrayList<String> files = new ArrayList<>();
+    for (String item : (new File(dir)).list()) {
+      String path = join(dir, item);
+      if (new File(path).isDirectory())
+        files.addAll(addPath(tracks(path), item));
+      else if (REX.matcher(item).find())
+        files.add(item);
+    }
+    return files;
   }
   
   static ArrayList<String> addPath(List<String> files, String dir) {
@@ -78,7 +88,7 @@ class Lib {
 
   static String cut(String name, int limit) {
 
-    List<String> words = Arrays.stream(name.split("(\\s+)(_+)(-+)"))
+    List<String> words = Arrays.stream(name.split("[\\s+_+-+]"))
         .filter(w -> w.length() > 0).collect(Collectors.toList());
 
     int[] sizes = new int[words.size()];

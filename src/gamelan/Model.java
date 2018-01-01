@@ -5,9 +5,7 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaPlayer.Status;
 import org.apache.commons.io.FilenameUtils;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalTime;
@@ -97,7 +95,7 @@ class Model {
     control.activate("albs", nAlb);
     control.artist.setText(" " + art);
     control.album.setText(" " + alb);
-    tracks = Lib.tracks(arts.get(art), alb);
+    tracks = Lib.loadTracks(arts.get(art), alb);
     this.nTrack = nTrack;
     playTrack(tracks.get(nTrack));
     return tracks;
@@ -141,7 +139,8 @@ class Model {
 
   private void save() {
     try {
-      FileWriter fw = new FileWriter(lastFile);
+      //FileWriter fw = new FileWriter(lastFile);
+      OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(lastFile),"UTF-8");
       String[] data = {art, alb, Integer.toString(nTrack)};
       Arrays.asList(data).forEach(val -> {
             try {
