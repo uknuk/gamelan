@@ -54,7 +54,7 @@ class Model {
     }
   }
 
-  SortedSet<String> loadArtists() {
+  ArrayList<String> loadArtists() {
     try {
       String[] dirs = Files
           .lines(Paths.get(FilenameUtils.concat(home, DIRS_FILE)))
@@ -68,7 +68,7 @@ class Model {
 
       arts.remove("desktop.ini");
 
-      return new TreeSet(arts.keySet());
+      return new ArrayList(arts.keySet());
     }
     catch (IOException ex) {
       System.out.printf("File %s not found", DIRS_FILE);
@@ -139,7 +139,6 @@ class Model {
 
   private void save() {
     try {
-      //FileWriter fw = new FileWriter(lastFile);
       OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(lastFile),"UTF-8");
       String[] data = {art, alb, Integer.toString(nTrack)};
       Arrays.asList(data).forEach(val -> {

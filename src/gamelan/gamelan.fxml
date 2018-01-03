@@ -43,7 +43,8 @@
                         <FlowPane fx:id="tracks" style="-fx-text-fill: blue" />
                      </children>
                   </VBox>
-               </children></AnchorPane>
+               </children>
+        </AnchorPane>
       </content>
     </Tab>
     <Tab fx:id="artsTab" text="Artists">

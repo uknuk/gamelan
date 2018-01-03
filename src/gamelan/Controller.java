@@ -56,17 +56,14 @@ public class Controller {
         e -> model.getDuration()));
     timeline.setCycleCount(Animation.INDEFINITE);
     timeline.play();
-
-    //root.getSelectionModel().select(1);
-
   }
 
-  private void showArtists(Set<String> arts) {
+  private void showArtists(ArrayList<String> arts) {
     ObservableList<Node> ch = artists.getChildren();
 
-    arts.forEach(art ->
-        ch.add(Lib.makeButton(art, "arts", e -> selectArtist(art))));
-
+    Lib.setFontSize("arts", arts);
+    for (String art : arts)
+      ch.add(Lib.makeButton(art, "arts", ev -> selectArtist(art)));
   }
 
   void selectArtist(String art) {
@@ -86,14 +83,16 @@ public class Controller {
   private void selectTrack(String track) { model.playTrack(track);
   }
 
-  private void show(ArrayList<String> files, FlowPane pane, String kind,
+  private void show(ArrayList<String> items, FlowPane pane, String kind,
                     Consumer<String> fun) {
 
     ObservableList<Node> ch = pane.getChildren();
     ch.clear();
 
-    files.forEach(file ->
-      ch.add(Lib.makeButton(file, kind, e -> fun.accept(file))));
+    Lib.setFontSize(kind, items);
+
+    for (String item : items)
+      ch.add(Lib.makeButton(item, kind, ev -> fun.accept(item)));
   }
 
   @FXML
